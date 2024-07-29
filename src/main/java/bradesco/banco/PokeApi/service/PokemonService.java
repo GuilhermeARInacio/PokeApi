@@ -1,6 +1,7 @@
 package bradesco.banco.PokeApi.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,10 +64,13 @@ public class PokemonService {
         Pokemon pokemon = getPokemonByName(name);
         Optional<Pokedex> pokedexOptional = pokedexRepository.findByTrainerName(trainer);
         Pokedex pokedex = pokedexOptional.orElseThrow(() -> new PokemonNotFoundException(trainer));
-        pokedex.getPokemons().remove(pokemon);
-        pokedexRepository.save(pokedex);
-        pokemon.setPokedex(null);
-        pokemonRepository.save(pokemon);
+
+        List<Pokemon> pokemons = pokemonRepository.findByPokemon(pokemon.getId(), pokedex.getId());
+
+        for(Pokemon p : pokemons){
+            pokemonRepository.delete(p);
+        }
+
         return (pokemon.getName() + " removido da pokedex de " + trainer);
     }
 
